@@ -710,7 +710,6 @@ def main():
         eval_metrics = []
         eval_preds = []
         eval_labels = []
-        eval_langs = []
 
         eval_steps = len(eval_dataset) // eval_batch_size
         eval_step_progress_bar = tqdm(total=eval_steps, desc="Evaluating...", position=2, leave=False)
@@ -728,7 +727,6 @@ def main():
                 generated_ids = p_generate_step(state.params, batch)
                 eval_preds.extend(jax.device_get(generated_ids.reshape(-1, gen_kwargs["max_length"])))
                 eval_labels.extend(jax.device_get(labels.reshape(-1, labels.shape[-1])))
-                eval_langs.extend(jax.device_get(langs.reshape(-1, langs.shape[-1])))
 
             eval_step_progress_bar.update(1)
 
