@@ -500,7 +500,7 @@ def main():
             batch_size=train_batch_size,
             shuffle=True,
             num_workers=data_args.preprocessing_num_workers,
-            persistent_workers=True,
+            persistent_workers=False,
             drop_last=True,
             collate_fn=data_collator,
         )
@@ -511,7 +511,7 @@ def main():
             batch_size=eval_batch_size,
             shuffle=False,
             num_workers=data_args.preprocessing_num_workers,
-            persistent_workers=True,
+            persistent_workers=False,
             drop_last=True,
             collate_fn=data_collator,
         )
