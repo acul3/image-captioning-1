@@ -430,7 +430,7 @@ def main():
     if training_args.do_predict:
         predict_dataset = ImageTextDataset(
             data_args.data_dir,
-            data_args.prediction_file,
+            data_args.validation_file,
             captions_per_image=1,
             transform=preprocess,
         )
