@@ -5,7 +5,7 @@ Sample run:
 ```
 python run_vit_gpt2.py \
     --output_dir="testing" \
-    --data_dir="data/Flicker8k_Dataset" \
+    --data_dir="./" \
     --train_file="data/train.tsv" \
     --validation_file="data/val.tsv" \
     --do_train --do_eval \

@@ -67,8 +67,8 @@ class ImageTextDataset(VisionDataset):
 
         examples = pd.read_csv(file_path, sep="\t")
 
-        self.image_paths = [f"data/{img}" for img in examples["image_file"].values]
-        self.captions = examples["caption"].values
+        self.image_paths = [f"data/{img}" for img in examples["image_path"].values]
+        self.captions = examples["captions"].values
 
     def _load_image(self, idx: int):
         path = self.image_paths[idx]
