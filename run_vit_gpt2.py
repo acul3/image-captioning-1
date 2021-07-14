@@ -715,7 +715,7 @@ def main():
         for batch in eval_loader:
             # Model forward
             batch = shard(batch)
-            labels = batch["input_ids"]
+            labels = batch["labels"]
 
             metrics = p_eval_step(state.params, batch)
             eval_metrics.append(metrics)
@@ -743,6 +743,9 @@ def main():
         desc = f"Epoch... ({epoch + 1}/{num_epochs} | Eval Loss: {eval_metrics['loss']} | {rouge_desc})"
         epochs.write(desc)
         epochs.desc = desc
+        with open(os.path.join(training_args.output_dir, f'report.txt'), 'a', encoding='UTF-8') as fp:
+            fp.write(desc + '\n')
+
 
         # Save metrics
         if has_tensorboard and jax.process_index() == 0:
