@@ -400,7 +400,7 @@ def main():
         vit_model_name_or_path='google/vit-base-patch16-224-in21k', 
         gpt2_model_name_or_path='flax-community/gpt2-small-indonesian'
     )
-    
+    model.config.is_encoder_decoder = True
     config = model.config
 
     # set seed for torch dataloaders

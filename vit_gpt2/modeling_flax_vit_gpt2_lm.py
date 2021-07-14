@@ -215,6 +215,7 @@ class FlaxViTGPT2LMPreTrainedModel(FlaxPreTrainedModel):
     def encode(
         self,
         pixel_values: jnp.ndarray,
+        attention_mask: Optional[jnp.ndarray] = None,
         output_attentions: Optional[bool] = None,
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
@@ -541,8 +542,8 @@ class FlaxViTGPT2LMForConditionalGeneration(FlaxViTGPT2LMPreTrainedModel):
         if return_dict:
             outputs = FlaxCausalLMOutputWithCrossAttentions(
                 logits=lm_logits,
-                hidden_states=outputs.hidden_states,
-                attentions=outputs.attentions,
+                hidden_states=outputs.decoder_hidden_states,
+                attentions=outputs.decoder_attentions,
                 cross_attentions=outputs.cross_attentions,
             )
         else:
