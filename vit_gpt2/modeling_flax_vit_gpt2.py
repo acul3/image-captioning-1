@@ -412,7 +412,7 @@ class FlaxViTGPT2PreTrainedModel(FlaxPreTrainedModel):
             return_dict if return_dict is not None else self.config.return_dict
         )
 
-        pixel_values = jnp.transpose(pixel_values, (0, 2, 3, 1))
+        #pixel_values = jnp.transpose(pixel_values, (0, 2, 3, 1))
 
         # # prepare encoder inputs
         # if encoder_attention_mask is None:
