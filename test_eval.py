@@ -1,7 +1,6 @@
 import logging
 import os
 import time
-from nltk.util import pr
 import pandas as pd
 import datasets
 import nltk
@@ -397,7 +396,10 @@ def main():
 
     
     # Model
-    model = FlaxViTGPT2LMForConditionalGeneration.from_pretrained('munggok/image-captioning')
+    model = FlaxViTGPT2LMForConditionalGeneration.from_vit_gpt2_pretrained(
+        vit_model_name_or_path='google/vit-base-patch16-224-in21k', 
+        gpt2_model_name_or_path='flax-community/gpt2-small-indonesian'
+    )
     model.config.is_encoder_decoder = True
     config = model.config
 
@@ -479,22 +481,22 @@ def main():
         int(training_args.per_device_train_batch_size) * jax.device_count()
     )
     eval_batch_size = int(training_args.per_device_eval_batch_size) * jax.device_count()
-    #steps_per_epoch = len(train_dataset) // train_batch_size
-    #total_train_steps = steps_per_epoch * num_epochs
+    steps_per_epoch = len(train_dataset) // train_batch_size
+    total_train_steps = steps_per_epoch * num_epochs
 
     # Create learning rate schedule
     linear_decay_lr_schedule_fn = create_learning_rate_fn(
-        len(predict_dataset),
+        len(train_dataset),
         train_batch_size,
         training_args.num_train_epochs,
         training_args.warmup_steps,
         training_args.learning_rate,
     )
-    training_args.do_predict = True
+
     # Create data loaders
     if training_args.do_train:
         train_loader = torch.utils.data.DataLoader(
-            predict_dataset,
+            train_dataset,
             batch_size=train_batch_size,
             shuffle=True,
             num_workers=data_args.preprocessing_num_workers,
@@ -542,8 +544,8 @@ def main():
         decoded_preds = tokenizer.batch_decode(preds, skip_special_tokens=True)
         decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
         decoded_preds, decoded_labels = postprocess_text(decoded_preds, decoded_labels)
-        print("prediction",decoded_preds)
-        print("Labels",decoded_labels)
+        print("Preds",decoded_preds)
+        print("label",decoded_labels)
         result = metric.compute(predictions=decoded_preds, references=decoded_labels, use_stemmer=True)
 
         result = {key: value.mid.fmeasure * 100 for key, value in result.items()}
@@ -667,53 +669,71 @@ def main():
     state = jax_utils.replicate(state)
 
     logger.info("***** Running training *****")
-    logger.info(f"  Num examples = {len(predict_dataset)}")
+    logger.info(f"  Num examples = {len(train_dataset)}")
     logger.info(f"  Num Epochs = {num_epochs}")
     logger.info(f"  Instantaneous batch size per device = {training_args.per_device_train_batch_size}")
-    #logger.info(f"  Total train batch size (w. parallel & distributed) = {train_batch_size}")
-    #logger.info(f"  Total optimization steps = {total_train_steps}")
+    logger.info(f"  Total train batch size (w. parallel & distributed) = {train_batch_size}")
+    logger.info(f"  Total optimization steps = {total_train_steps}")
 
     train_time = 0
     epochs = tqdm(range(num_epochs), desc=f"Epoch ... (1/{num_epochs})", position=0)
-    
+    for epoch in epochs:
+        # ======================== Training ================================
+        train_start = time.time()
 
-    # ======================== Prediction loop ==============================
-    if training_args.do_predict:
-        logger.info("*** Predict ***")
+        # Create sampling rng
+        rng, input_rng = jax.random.split(rng)
+        train_metrics = []
 
-        pred_metrics = []
-        pred_generations = []
-        pred_labels = []
+        steps_per_epoch = len(train_dataset) // train_batch_size
 
-        pred_steps = len(predict_dataset) // eval_batch_size
-        for _ in tqdm(range(pred_steps), desc="Predicting...", position=2, leave=False):
+        # ======================== Evaluating ==============================
+        eval_metrics = []
+        eval_preds = []
+        eval_labels = []
+
+        eval_steps = len(eval_dataset) // eval_batch_size
+        eval_step_progress_bar = tqdm(total=eval_steps, desc="Evaluating...", position=2, leave=False)
+        for batch in eval_loader:
             # Model forward
-            batch = next(pred_loader)
+            batch = shard(batch)
             labels = batch["labels"]
 
             metrics = p_eval_step(state.params, batch)
-            pred_metrics.append(metrics)
+            eval_metrics.append(metrics)
 
             # generation
             if data_args.predict_with_generate:
                 generated_ids = p_generate_step(state.params, batch)
-                pred_generations.extend(jax.device_get(generated_ids.reshape(-1, gen_kwargs["max_length"])))
-                pred_labels.extend(jax.device_get(labels.reshape(-1, labels.shape[-1])))
+                eval_preds.extend(jax.device_get(generated_ids.reshape(-1, gen_kwargs["max_length"])))
+                eval_labels.extend(jax.device_get(labels.reshape(-1, labels.shape[-1])))
 
-        # normalize prediction metrics
-        pred_metrics = get_metrics(pred_metrics)
-        pred_metrics = jax.tree_map(jnp.mean, pred_metrics)
+            eval_step_progress_bar.update(1)
+
+        # normalize eval metrics
+        eval_metrics = get_metrics(eval_metrics)
+        eval_metrics = jax.tree_map(jnp.mean, eval_metrics)
 
         # compute ROUGE metrics
         rouge_desc = ""
         if data_args.predict_with_generate:
-            rouge_metrics = compute_metrics(pred_generations, pred_labels)
-            pred_metrics.update(rouge_metrics)
-            rouge_desc = " ".join([f"Predict {key}: {value} |" for key, value in rouge_metrics.items()])
+            rouge_metrics = compute_metrics(eval_preds, eval_labels)
+            eval_metrics.update(rouge_metrics)
+            rouge_desc = " ".join([f"Eval {key}: {value} |" for key, value in rouge_metrics.items()])
 
-        # Print metrics
-        desc = f"Predict Loss: {pred_metrics['loss']} | {rouge_desc})"
-        logger.info(desc)
+        # Print metrics and update progress bar
+        desc = f"Epoch... ({epoch + 1}/{num_epochs} | Eval Loss: {eval_metrics['loss']} | {rouge_desc})"
+        epochs.write(desc)
+        epochs.desc = desc
+        with open(os.path.join(training_args.output_dir, f'report.txt'), 'a', encoding='UTF-8') as fp:
+            fp.write(desc + '\n')
+
+
+        # Save metrics
+        if has_tensorboard and jax.process_index() == 0:
+            cur_step = epoch * (len(train_dataset) // train_batch_size)
+            write_metric(summary_writer, train_metrics, eval_metrics, train_time, cur_step)
+        
 
         # save checkpoint after each epoch and push checkpoint to the hub
 
