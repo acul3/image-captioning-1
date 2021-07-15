@@ -4,6 +4,7 @@ Sample run:
 
 ```
 python run_vit_gpt2.py \
+    --max_train_samples 5000 \
     --preprocessing_num_workers 0 \
     --predict_with_generate \
     --output_dir="testing_decoder" \

@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+from nltk.util import pr
 import pandas as pd
 import datasets
 import nltk
@@ -550,7 +551,8 @@ def main():
         decoded_preds = tokenizer.batch_decode(preds, skip_special_tokens=True)
         decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
         decoded_preds, decoded_labels = postprocess_text(decoded_preds, decoded_labels)
-
+        print("decoded_labels",decoded_preds)
+        print("decoded_labels",decoded_labels)
         result = metric.compute(predictions=decoded_preds, references=decoded_labels, use_stemmer=True)
 
         result = {key: value.mid.fmeasure * 100 for key, value in result.items()}
@@ -749,8 +751,6 @@ def main():
         desc = f"Epoch... ({epoch + 1}/{num_epochs} | Eval Loss: {eval_metrics['loss']} | {rouge_desc})"
         epochs.write(desc)
         epochs.desc = desc
-        with open(os.path.join(training_args.output_dir, f'report.txt'), 'a', encoding='UTF-8') as fp:
-            fp.write(desc + '\n')
 
 
         # Save metrics
