@@ -484,7 +484,7 @@ def main():
 
     # Create learning rate schedule
     linear_decay_lr_schedule_fn = create_learning_rate_fn(
-        len(train_dataset),
+        len(predict_dataset),
         train_batch_size,
         training_args.num_train_epochs,
         training_args.warmup_steps,
@@ -494,7 +494,7 @@ def main():
     # Create data loaders
     if training_args.do_train:
         train_loader = torch.utils.data.DataLoader(
-            train_dataset,
+            predict_dataset,
             batch_size=train_batch_size,
             shuffle=True,
             num_workers=data_args.preprocessing_num_workers,
@@ -667,7 +667,7 @@ def main():
     state = jax_utils.replicate(state)
 
     logger.info("***** Running training *****")
-    logger.info(f"  Num examples = {len(train_dataset)}")
+    logger.info(f"  Num examples = {len(predict_dataset)}")
     logger.info(f"  Num Epochs = {num_epochs}")
     logger.info(f"  Instantaneous batch size per device = {training_args.per_device_train_batch_size}")
     #logger.info(f"  Total train batch size (w. parallel & distributed) = {train_batch_size}")
