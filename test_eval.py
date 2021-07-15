@@ -667,7 +667,7 @@ def main():
 
     # Replicate the train state on each device
     state = jax_utils.replicate(state)
-
+    data_args.predict_with_generate = True
     logger.info("***** Running training *****")
     logger.info(f"  Num examples = {len(train_dataset)}")
     logger.info(f"  Num Epochs = {num_epochs}")
