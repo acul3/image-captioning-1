@@ -396,10 +396,7 @@ def main():
 
     
     # Model
-    model = FlaxViTGPT2LMForConditionalGeneration.from_vit_gpt2_pretrained(
-        vit_model_name_or_path='google/vit-base-patch16-224-in21k', 
-        gpt2_model_name_or_path='flax-community/gpt2-small-indonesian'
-    )
+    model = FlaxViTGPT2LMForConditionalGeneration.from_pretrained('munggok/image-captioning')
     model.config.is_encoder_decoder = True
     config = model.config
 
