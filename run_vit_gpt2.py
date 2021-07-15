@@ -407,7 +407,7 @@ def main():
     model.config.decoder_start_token_id = gpt2_config.bos_token_id
     model.config.bos_token_id = gpt2_config.bos_token_id
     model.config.eos_token_id = gpt2_config.eos_token_id
-    model.config.pad_token_id = gpt2_config.eos_token_id
+    model.config.pad_token_id = 1
     config = model.config
 
     # set seed for torch dataloaders
