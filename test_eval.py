@@ -479,8 +479,8 @@ def main():
         int(training_args.per_device_train_batch_size) * jax.device_count()
     )
     eval_batch_size = int(training_args.per_device_eval_batch_size) * jax.device_count()
-    steps_per_epoch = len(train_dataset) // train_batch_size
-    total_train_steps = steps_per_epoch * num_epochs
+    #steps_per_epoch = len(train_dataset) // train_batch_size
+    #total_train_steps = steps_per_epoch * num_epochs
 
     # Create learning rate schedule
     linear_decay_lr_schedule_fn = create_learning_rate_fn(
@@ -670,8 +670,8 @@ def main():
     logger.info(f"  Num examples = {len(train_dataset)}")
     logger.info(f"  Num Epochs = {num_epochs}")
     logger.info(f"  Instantaneous batch size per device = {training_args.per_device_train_batch_size}")
-    logger.info(f"  Total train batch size (w. parallel & distributed) = {train_batch_size}")
-    logger.info(f"  Total optimization steps = {total_train_steps}")
+    #logger.info(f"  Total train batch size (w. parallel & distributed) = {train_batch_size}")
+    #logger.info(f"  Total optimization steps = {total_train_steps}")
 
     train_time = 0
     epochs = tqdm(range(num_epochs), desc=f"Epoch ... (1/{num_epochs})", position=0)
