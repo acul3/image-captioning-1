@@ -22,7 +22,7 @@ vit_model_name = 'google/vit-base-patch16-224-in21k'
 feature_extractor = ViTFeatureExtractor.from_pretrained(vit_model_name)
 
 gpt2_model_name = 'flax-community/gpt2-small-indonesian'
-tokenizer = GPT2Tokenizer.from_pretrained(gpt2_model_name)
+tokenizer = GPT2Tokenizer.from_pretrained(gpt2_model_name,pad_token="<PAD>")
 
 max_length = 16
 num_beams = 4

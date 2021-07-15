@@ -53,7 +53,6 @@ import requests
 import numpy as np
 
 
-
 class ImageTextDataset(VisionDataset):
     def __init__(
         self,
@@ -113,7 +112,7 @@ class FlaxDataCollatorForImageLanguageModeling:
         # Encode
         encoder_inputs = self.feature_extractor(images=images, return_tensors="jax")
         pixel_values = encoder_inputs.pixel_values
-
+        captions = [x + ' ' + self.tokenizer.eos_token for x in captions]
         # Decode
         # Handle dict or lists with proper padding and conversion to tensor.
         #decoder_inputs = self.tokenizer(captions, max_length=self.max_length, padding="max_length", return_tensors="jax")
