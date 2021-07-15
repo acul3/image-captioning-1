@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from datasets import Dataset, load_dataset, load_metric
 from transformers.file_utils import is_offline_mode
 from functools import partial
-
+from transformers import GPT2Config
 # You can also adapt this script on your own masked language modeling task. Pointers for this are left as comments.
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Callable
@@ -393,7 +393,7 @@ def main():
 
     # Set seed before initializing model.
     set_seed(training_args.seed)
-
+    
     
     # Model
     model = FlaxViTGPT2LMForConditionalGeneration.from_vit_gpt2_pretrained(
@@ -401,6 +401,12 @@ def main():
         gpt2_model_name_or_path='flax-community/gpt2-small-indonesian'
     )
     model.config.is_encoder_decoder = True
+    gpt2_config = GPT2Config.from_pretrained('flax-community/gpt2-small-indonesian')
+    gpt2_config.add_cross_attention = True
+    model.config.decoder_start_token_id = gpt2_config.bos_token_id
+    model.config.bos_token_id = gpt2_config.bos_token_id
+    model.config.eos_token_id = gpt2_config.eos_token_id
+    config = model.config
     config = model.config
 
     # set seed for torch dataloaders
