@@ -223,6 +223,7 @@ class FlaxViTGPT2LMPreTrainedModel(FlaxPreTrainedModel):
         params: dict = None,
         dropout_rng: PRNGKey = None,
     ):
+        
         output_attentions = (
             output_attentions
             if output_attentions is not None
@@ -236,6 +237,8 @@ class FlaxViTGPT2LMPreTrainedModel(FlaxPreTrainedModel):
         return_dict = (
             return_dict if return_dict is not None else self.config.return_dict
         )
+        
+        pixel_values = jnp.transpose(pixel_values, (0, 2, 3, 1))
 
         # Handle any PRNG if needed
         rngs = {}
@@ -391,7 +394,7 @@ class FlaxViTGPT2LMPreTrainedModel(FlaxPreTrainedModel):
             return_dict if return_dict is not None else self.config.return_dict
         )
 
-        #pixel_values = jnp.transpose(pixel_values, (0, 2, 3, 1))
+        pixel_values = jnp.transpose(pixel_values, (0, 2, 3, 1))
 
         # # prepare encoder inputs
         # if encoder_attention_mask is None:
