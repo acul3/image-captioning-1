@@ -51,7 +51,7 @@ from transformers import ViTFeatureExtractor
 from PIL import Image
 import requests
 import numpy as np
-
+gpt2_config = GPT2Config.from_pretrained('flax-community/gpt2-small-indonesian')
 
 class ImageTextDataset(VisionDataset):
     def __init__(
@@ -129,7 +129,7 @@ class FlaxDataCollatorForImageLanguageModeling:
 
         # check
         decoder_input_ids = shift_tokens_right_fn(
-            jnp.array(labels["input_ids"]), 50265, 50265
+            jnp.array(labels["input_ids"]), 1, gpt2_config.bos_token_id
         )
 
         model_inputs['input_ids'] = np.asarray(decoder_input_ids)
@@ -401,7 +401,6 @@ def main():
         gpt2_model_name_or_path='flax-community/gpt2-small-indonesian'
     )
     model.config.is_encoder_decoder = True
-    gpt2_config = GPT2Config.from_pretrained('flax-community/gpt2-small-indonesian')
     gpt2_config.add_cross_attention = True
     model.config.decoder_start_token_id = gpt2_config.bos_token_id
     model.config.bos_token_id = gpt2_config.bos_token_id
