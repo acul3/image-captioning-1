@@ -717,7 +717,7 @@ def main():
 
     def generate_step(params, batch):
         model.params = params
-        print("asdsad",batch["pixel_values"])
+        #print("asdsad",batch["pixel_values"])
         output_ids = model.generate(batch["pixel_values"], **gen_kwargs)
         return output_ids.sequences
 
@@ -790,6 +790,7 @@ def main():
                 # curr_lang = list(map_lang_num.keys())[lang[0]] # TODO: Check if we can directly replace with lists?
                 # generation
                 if data_args.predict_with_generate:
+                    print("sadkpoaksdpokas",batch["pixel_values"])
                     generated_ids = p_generate_step(state.params, batch)
                     # print("generated_ids:", generated_ids)
                     eval_preds.extend(jax.device_get(generated_ids.reshape(-1, gen_kwargs["max_length"])))
