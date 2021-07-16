@@ -418,20 +418,16 @@ def main():
 
     # Setting padding="max_length" as we need fixed length inputs for jitted functions
     def preprocess_function(examples):
-    
-        pixels_file = examples[pixels_file_column]
-        if not pixels_file:
-            assert examples[image_file_column]
-            _pixel_values = []
-            for y in examples[image_file_column]:
-                with Image.open(y) as image:
-                    encoder_inputs = feature_extractor(images=image, return_tensors="np")
-                    x = encoder_inputs.pixel_values
-                    _pixel_values.append(x)
-            pixel_values = np.concatenate(_pixel_values)
-        else:
-            pixel_values = np.concatenate([np.load(x) for x in pixels_file])
 
+        _pixel_values = []
+        print(examples[image_file_column])
+        for y in examples[image_file_column]:
+            with Image.open(y) as image:
+                encoder_inputs = feature_extractor(images=image, return_tensors="np")
+                x = encoder_inputs.pixel_values
+                _pixel_values.append(x)
+        pixel_values = np.concatenate(_pixel_values)
+    
         targets = examples[caption_column]
 
         # Add eos_token!!
