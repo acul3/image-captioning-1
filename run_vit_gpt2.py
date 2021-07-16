@@ -112,7 +112,7 @@ class FlaxDataCollatorForImageLanguageModeling:
         # Encode
         encoder_inputs = self.feature_extractor(images=images, return_tensors="np")
         pixel_values = encoder_inputs.pixel_values
-        captions = [x + ' ' + self.tokenizer.eos_token for x in captions]
+
         # Decode
         # Handle dict or lists with proper padding and conversion to tensor.
         #decoder_inputs = self.tokenizer(captions, max_length=self.max_length, padding="max_length", return_tensors="jax")
@@ -129,7 +129,7 @@ class FlaxDataCollatorForImageLanguageModeling:
 
         # check
         decoder_input_ids = shift_tokens_right_fn(
-            jnp.array(labels["input_ids"]), 1, gpt2_config.bos_token_id
+            labels["input_ids"], 50256, gpt2_config.bos_token_id
         )
 
         model_inputs['input_ids'] = np.asarray(decoder_input_ids)
@@ -405,7 +405,7 @@ def main():
     model.config.decoder_start_token_id = gpt2_config.bos_token_id
     model.config.bos_token_id = gpt2_config.bos_token_id
     model.config.eos_token_id = gpt2_config.eos_token_id
-    model.config.pad_token_id = 1
+    model.config.pad_token_id = 50256
     config = model.config
 
     # set seed for torch dataloaders

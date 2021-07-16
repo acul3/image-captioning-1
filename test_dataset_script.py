@@ -120,7 +120,7 @@ def preprocess_function(examples):
     #rint(gpt2_config.bos_token_id)
 
     decoder_input_ids = shift_tokens_right_fn(
-        jnp.array(labels["input_ids"]), 1, gpt2_config.bos_token_id
+        jnp.array(labels["input_ids"]), 50265, 50265
     )
     model_inputs["input_ids"] = np.asarray(decoder_input_ids)
 
