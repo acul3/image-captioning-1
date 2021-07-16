@@ -110,7 +110,7 @@ class FlaxDataCollatorForImageLanguageModeling:
         shift_tokens_right_fn = getattr(model_module, "shift_tokens_right")
 
         # Encode
-        encoder_inputs = self.feature_extractor(images=images, return_tensors="jax")
+        encoder_inputs = self.feature_extractor(images=images, return_tensors="np")
         pixel_values = encoder_inputs.pixel_values
         captions = [x + ' ' + self.tokenizer.eos_token for x in captions]
         # Decode
@@ -120,7 +120,7 @@ class FlaxDataCollatorForImageLanguageModeling:
             #self.tokenizer.pad_token = self.tokenizer.eos_token
             #self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
             labels = self.tokenizer(
-                captions, max_length=self.max_length, padding=True, truncation=True, return_tensors="jax"
+                captions, max_length=self.max_length, padding="max_length", truncation=True, return_tensors="np"
             )
         
         model_inputs = dict(labels)
