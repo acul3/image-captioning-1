@@ -420,7 +420,6 @@ def main():
     def preprocess_function(examples):
 
         _pixel_values = []
-        print(examples[image_file_column])
         for y in examples[image_file_column]:
             with Image.open(y) as image:
                 encoder_inputs = feature_extractor(images=image, return_tensors="np")

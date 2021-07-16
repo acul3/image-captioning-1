@@ -6,6 +6,47 @@ import os
 import datasets
 import pandas as pd
 import numpy as np
+import logging
+import os
+import sys
+import time
+from dataclasses import dataclass, field
+from functools import partial
+from pathlib import Path
+from typing import Callable, Optional
+from PIL import Image
+import datasets
+import nltk  # Here to have a nice missing dependency error message early on
+import numpy as np
+from datasets import Dataset, load_dataset, load_metric
+from tqdm import tqdm
+
+import jax
+import jax.numpy as jnp
+import optax
+import transformers
+from filelock import FileLock
+from flax import jax_utils, traverse_util
+from flax.jax_utils import unreplicate
+from flax.training import train_state
+from flax.training.common_utils import get_metrics, onehot, shard, shard_prng_key
+from transformers import (
+    CONFIG_MAPPING,
+    FLAX_MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING,
+    AutoConfig,
+    AutoTokenizer,
+    FlaxAutoModelForSeq2SeqLM,
+    HfArgumentParser,
+    TrainingArguments,
+    is_tensorboard_available,
+)
+from transformers.file_utils import is_offline_mode
+
+from transformers import ViTFeatureExtractor, GPT2Tokenizer, GPT2Config
+from vit_gpt2.modeling_flax_vit_gpt2_lm import FlaxViTGPT2LMForConditionalGeneration
+
+logger = logging.getLogger(__name__)
+
 
 
 # TODO: Add BibTeX citation
