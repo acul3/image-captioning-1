@@ -45,17 +45,18 @@ python run_summarization.py \
     --overwrite_output_dir \
 
 python3 main_backup.py \
-    --output_dir “test-mic \
+    --output_dir="test-mic" \
     --logging_steps 400 \
     --eval_steps 400 \
     --save_steps 400 \
-    --data_dir="./" \
+    --data_dir="data" \
     --train_file="data/train.tsv" \
     --validation_file="data/val.tsv" \
     --save_total_limit 2 \
-    --max_train_samples 2000 \
-    --max_eval_samples_per_lang 1000 \
+    --predict_with_generate \
+    --do_eval \
+    --do_train \
     --per_device_train_batch_size 16 \
-    --per_device_eval_batch_size 512 \
+    --per_device_eval_batch_size 512
 
 [Model code](https://github.com/ydshieh/vit-gpt2)

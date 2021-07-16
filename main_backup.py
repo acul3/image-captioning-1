@@ -588,7 +588,7 @@ def main():
 
         decoded_preds = tokenizer.batch_decode(preds, skip_special_tokens=True, max_length=64)
         decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True, max_length=64)
-
+        
         # Some simple post-processing
         decoded_preds, decoded_labels = postprocess_text(decoded_preds, decoded_labels, map_bart_nltk[lang])
 

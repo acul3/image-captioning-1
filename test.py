@@ -1,6 +1,6 @@
 from operator import mod
 from vit_gpt2.modeling_flax_vit_gpt2_lm import FlaxViTGPT2LMForConditionalGeneration
-from transformers import ViTFeatureExtractor, GPT2Tokenizer
+from transformers import ViTFeatureExtractor, GPT2Tokenizer,CLIPFeatureExtractor
 from torchvision.io import ImageReadMode, read_image
 from PIL import Image
 import numpy as np
@@ -11,47 +11,33 @@ from vit_gpt2.modeling_flax_vit_gpt2_lm import FlaxViTGPT2LMForConditionalGenera
 from transformers import ViTFeatureExtractor
 from PIL import Image
 import requests
+import torch
 import numpy as np
-
+import jax
 # GPT2 / GPT2LM - as decoder
-from transformers import ViTFeatureExtractor, GPT2Tokenizer
+from transformers import ViTFeatureExtractor, GPT2Tokenizer, MarianTokenizer
+from flax_clip_vision_marian.modeling_clip_vision_marian import FlaxCLIPVisionMarianForConditionalGeneration
+#flax_vit_gpt2_lm = FlaxViTGPT2LMForConditionalGeneration.from_pretrained('munggok/image-captioning')
+flax_marian_clip = FlaxCLIPVisionMarianForConditionalGeneration.from_pretrained('munggok/image-captioning-marian',)
+from torchvision.io import ImageReadMode, read_image
+gpt2_model_name = 'Helsinki-NLP/opus-mt-en-id'
+tokenizer = MarianTokenizer.from_pretrained(gpt2_model_name)
 
-flax_vit_gpt2_lm = FlaxViTGPT2LMForConditionalGeneration.from_pretrained('munggok/image-captioning')
-
-vit_model_name = 'google/vit-base-patch16-224-in21k'
-feature_extractor = ViTFeatureExtractor.from_pretrained(vit_model_name)
-
-gpt2_model_name = 'flax-community/gpt2-small-indonesian'
-tokenizer = GPT2Tokenizer.from_pretrained(gpt2_model_name,pad_token="<PAD>")
-
-max_length = 16
+max_length = 64
 num_beams = 4
 gen_kwargs = {"max_length": max_length, "num_beams": num_beams}
 
+def generate_step(batch):
+    output_ids = flax_marian_clip.generate(batch["pixel_values"], **gen_kwargs)
+    return output_ids.sequences
 
-def predict(image):
-
-    image = Image.open(requests.get(url, stream=True).raw)
+p_generate_step = jax.pmap(generate_step, "batch")
+image = read_image('000000039769.jpg', mode=ImageReadMode.RGB)
     # batch dim is added automatically
-    encoder_inputs = feature_extractor(images=image, return_tensors="jax")
-    pixel_values = encoder_inputs.pixel_values
 
-    # generation
-    batch = {'pixel_values': pixel_values}
-    generation = flax_vit_gpt2_lm.generate(batch['pixel_values'], **gen_kwargs)
+#encoder_inputs = feature_extractor(images=image, return_tensors="jax")
+pixel_values = torch.stack([image]).permute(0, 2, 3, 1).numpy()
 
-    token_ids = np.array(generation.sequences)[0]
-    caption = tokenizer.decode(token_ids)
-
-    return caption, token_ids
-
-
-if __name__ == '__main__':
-
-
-    url = 'http://images.cocodataset.org/val2017/000000039769.jpg'
-    image = Image.open(requests.get(url, stream=True).raw)
-    caption, token_ids = predict(image)
-
-    print(f'token_ids: {token_ids}')
-    print(f'caption: {caption}')
+# generation
+batch = {'pixel_values': pixel_values}
+flax_marian_clip(pixel_values=pixel_values)
