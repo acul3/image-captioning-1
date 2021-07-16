@@ -2,6 +2,7 @@ from functools import partial
 import gc
 import logging
 import nltk
+from nltk.util import pr
 import numpy as np
 import pandas as pd
 import os
@@ -716,6 +717,7 @@ def main():
 
     def generate_step(params, batch):
         model.params = params
+        print("asdsad",batch["pixel_values"])
         output_ids = model.generate(batch["pixel_values"], **gen_kwargs)
         return output_ids.sequences
 
