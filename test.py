@@ -1,13 +1,13 @@
 from torchvision.io import ImageReadMode, read_image
 import torch
-from transformers import MarianTokenizer,ViTFeatureExtractor,CLIPFeatureExtractor
+from transformers import MarianTokenizer,ViTFeatureExtractor,CLIPProcessor
 from flax_clip_vision_marian.modeling_clip_vision_marian import FlaxCLIPVisionMarianForConditionalGeneration
 flax_marian_clip = FlaxCLIPVisionMarianForConditionalGeneration.from_pretrained('munggok/image-captioning-marian',)
 from torchvision.io import ImageReadMode, read_image
 marian_model_name = 'Helsinki-NLP/opus-mt-en-id'
 tokenizer = MarianTokenizer.from_pretrained(marian_model_name)
 clip_model_name = 'openai/clip-vit-base-patch32'
-feature_extractor = CLIPFeatureExtractor.from_pretrained(clip_model_name)
+feature_extractor = CLIPProcessor.from_pretrained(clip_model_name)
 
 
 max_length = 64
