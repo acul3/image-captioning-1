@@ -71,6 +71,7 @@ def run_generate(input_str, p_generate, p_params):
     p_inputs = shard(inputs.data)
     output_ids = p_generate(p_params, p_inputs)
     output_strings = tokenizer.batch_decode(output_ids[0], skip_special_tokens=True, max_length=64)
+    print(output_strings)
     return output_strings
 
 def read_tsv_file(tsv_path):
@@ -79,25 +80,14 @@ def read_tsv_file(tsv_path):
     return df
 
 def arrange_data(captions, image_urls):  # iterates through all the captions and save there translations
-    try:
-        lis_ = []
-        for caption, image_url in zip(captions, image_urls):  # add english caption first
-            lis_.append({"caption":caption, "url":image_url, "lang_id": "id"})
-
-        for lang in LANG_LIST:
-            p_params = map_model_params[lang]
-            p_generate = map_name[lang_dict[lang]]
-
-            for caption, image_url in zip(tqdm(total=len(caption), position=0, leave=False, desc=f"processing for {lang} currently"), captions, image_urls):  # add other captions
-                output = run_generate(caption, p_generate, p_params)
-                lis_.append({"caption":output[0], "url":image_url, "lang_id": lang})
-
-            gc.collect()
-        return lis_
-
-    except Exception as e:
-        print(caption, image_url, " skipped!")
-        return
+      lis_ = []
+      for caption, image_url in zip(captions, image_urls):  # add english caption first
+          p_params = replicate(model_id.params)
+          p_generate = p_generate_id_XX
+          output = run_generate(caption, p_generate, p_params)
+          lis_.append({"caption":output[0], "url":image_url, "lang_id": "id"})
+          gc.collect()
+      return lis_
 
 
 _df = read_tsv_file(DATASET_PATH)
