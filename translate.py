@@ -75,7 +75,7 @@ def run_generate(input_str, p_generate, p_params):
     return output_strings
 
 def read_tsv_file(tsv_path):
-    df = pd.read_csv(tsv_path, delimiter="\t", index_col=False)
+    df = pd.read_csv(tsv_path, delimiter="\t", index_col=False,names=["caption", "url"])
     print("Number of Examples:", df.shape[0], "for", tsv_path)
     return df
 
@@ -83,7 +83,7 @@ def arrange_data(image_files, captions, image_urls):  # iterates through all the
     try:
         lis_ = []
         for image_file, caption, image_url in zip(image_files, captions, image_urls):  # add english caption first
-            lis_.append({"image_file":image_file, "caption":caption, "url":image_url, "lang_id": "en"})
+            lis_.append({"image_file":image_file, "caption":caption, "url":image_url, "lang_id": "id"})
 
         for lang in LANG_LIST:
             p_params = map_model_params[lang]
@@ -109,22 +109,21 @@ val_df.reset_index(drop=True, inplace=True)
 
 print("\n train/val dataset created. beginning translation")
 
-if IS_TRAIN:
-    df = train_df
-    output_file_name = os.path.join(SAVE_VAL, "train_file.tsv")
-    with open(output_file_name, 'w', newline='') as outtsv:  # creates a blank tsv with headers (overwrites existing file)
-        writer = csv.writer(outtsv, delimiter='\t')
-        writer.writerow(["image_file", "caption", "url", "lang_id"])
 
-else:
-    df = val_df
-    output_file_name = os.path.join(SAVE_VAL, "val_file.tsv")
-    with open(output_file_name, 'w', newline='') as outtsv:  # creates a blank tsv with headers (overwrites existing file)
-        writer = csv.writer(outtsv, delimiter='\t')
-        writer.writerow(["image_file", "caption", "url", "lang_id"])
+df = train_df
+output_file_name = os.path.join(SAVE_VAL, "train_file.tsv")
+with open(output_file_name, 'w', newline='') as outtsv:  # creates a blank tsv with headers (overwrites existing file)
+    writer = csv.writer(outtsv, delimiter='\t')
+    writer.writerow(["image_file", "caption", "url", "lang_id"])
+
+df = val_df
+output_file_name = os.path.join(SAVE_VAL, "val_file.tsv")
+with open(output_file_name, 'w', newline='') as outtsv:  # creates a blank tsv with headers (overwrites existing file)
+    writer = csv.writer(outtsv, delimiter='\t')
+    writer.writerow(["image_file", "caption", "url", "lang_id"])
 
 for i in tqdm(range(0,len(df),BATCH_SIZE)):
-    output_batch = arrange_data(list(df["image_file"])[i:i+BATCH_SIZE], list(df["caption"])[i:i+BATCH_SIZE], list(df["url"])[i:i+BATCH_SIZE])
+    output_batch = arrange_data(list(df["caption"])[i:i+BATCH_SIZE], list(df["url"])[i:i+BATCH_SIZE])
     with open(output_file_name, "a", newline='') as f:
       writer = csv.DictWriter(f, fieldnames=["image_file", "caption", "url", "lang_id"], delimiter='\t')
       for batch in output_batch:
