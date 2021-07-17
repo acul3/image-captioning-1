@@ -25,6 +25,8 @@ parser.add_argument("--is_train", type=int, default=0, help="train or validate")
 args = parser.parse_args()
 
 
+
+
 DATASET_PATH = args.tsv_path
 VAL_SPLIT = args.val_split
 LANG_LIST = args.lang_list
@@ -36,10 +38,7 @@ BATCH_SIZE = 24
 IS_TRAIN = args.is_train
 num_devices = 8
 lang_dict = {
-    "es" : "es_XX",
-    "de": "de_DE",
-    "fr": "fr_XX",
-    # "ru": "ru_RU"  # removed Russian after Patrick's suggestions
+    "id" : "id_XX"
 }
 
 model_id = FlaxMarianMTModel.from_pretrained("Wikidepia/marian-nmt-enid", from_pt=True)
