@@ -114,17 +114,17 @@ df = train_df
 output_file_name = os.path.join(SAVE_VAL, "train_file.tsv")
 with open(output_file_name, 'w', newline='') as outtsv:  # creates a blank tsv with headers (overwrites existing file)
     writer = csv.writer(outtsv, delimiter='\t')
-    writer.writerow(["image_file", "caption", "url", "lang_id"])
+    writer.writerow(["caption", "url", "lang_id"])
 
 df = val_df
 output_file_name = os.path.join(SAVE_VAL, "val_file.tsv")
 with open(output_file_name, 'w', newline='') as outtsv:  # creates a blank tsv with headers (overwrites existing file)
     writer = csv.writer(outtsv, delimiter='\t')
-    writer.writerow(["image_file", "caption", "url", "lang_id"])
+    writer.writerow(["caption", "url", "lang_id"])
 
 for i in tqdm(range(0,len(df),BATCH_SIZE)):
     output_batch = arrange_data(list(df["caption"])[i:i+BATCH_SIZE], list(df["url"])[i:i+BATCH_SIZE])
     with open(output_file_name, "a", newline='') as f:
-      writer = csv.DictWriter(f, fieldnames=["image_file", "caption", "url", "lang_id"], delimiter='\t')
+      writer = csv.DictWriter(f, fieldnames=["caption", "url", "lang_id"], delimiter='\t')
       for batch in output_batch:
           writer.writerow(batch)
