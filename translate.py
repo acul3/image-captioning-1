@@ -67,11 +67,13 @@ map_model_params = {
 }
 
 def run_generate(input_str, p_generate, p_params):
-    inputs = tokenizer([input_str for i in range(num_devices)], return_tensors="jax", padding="max_length", truncation=True, max_length=64)
+    inputs = tokenizer(input_str, return_tensors="jax", padding="max_length", truncation=True, max_length=64)
+    #inputs = tokenizer([input_str for i in range(num_devices)], return_tensors="jax", padding="max_length", truncation=True, max_length=64)
     p_inputs = shard(inputs.data)
+    #output_ids = p_generate(p_params, p_inputs)
+    #output_strings = tokenizer.batch_decode(output_ids[0], skip_special_tokens=True, max_length=64)
     output_ids = p_generate(p_params, p_inputs)
-    output_strings = tokenizer.batch_decode(output_ids[0], skip_special_tokens=True, max_length=64)
-    print(output_strings)
+    output_strings = tokenizer.batch_decode(output_ids.reshape(-1,64), skip_special_tokens=True, max_length=64)
     return output_strings
 
 def read_tsv_file(tsv_path):
