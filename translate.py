@@ -79,19 +79,19 @@ def read_tsv_file(tsv_path):
     print("Number of Examples:", df.shape[0], "for", tsv_path)
     return df
 
-def arrange_data(image_files, captions, image_urls):  # iterates through all the captions and save there translations
+def arrange_data(captions, image_urls):  # iterates through all the captions and save there translations
     try:
         lis_ = []
-        for image_file, caption, image_url in zip(image_files, captions, image_urls):  # add english caption first
-            lis_.append({"image_file":image_file, "caption":caption, "url":image_url, "lang_id": "id"})
+        for caption, image_url in zip(captions, image_urls):  # add english caption first
+            lis_.append({"caption":caption, "url":image_url, "lang_id": "id"})
 
         for lang in LANG_LIST:
             p_params = map_model_params[lang]
             p_generate = map_name[lang_dict[lang]]
 
-            for image_file, caption, image_url in zip(tqdm(image_files, total=len(image_files), position=0, leave=False, desc=f"processing for {lang} currently"), captions, image_urls):  # add other captions
+            for caption, image_url in zip(tqdm(total=len(caption), position=0, leave=False, desc=f"processing for {lang} currently"), captions, image_urls):  # add other captions
                 output = run_generate(caption, p_generate, p_params)
-                lis_.append({"image_file":image_file, "caption":output[0], "url":image_url, "lang_id": lang})
+                lis_.append({"caption":output[0], "url":image_url, "lang_id": lang})
 
             gc.collect()
         return lis_
